@@ -47,6 +47,7 @@ import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import com.lusion.noizs.ui.theme.NoizsAppTheme
+import android.content.Context
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -151,6 +152,13 @@ fun NoizsAppScreen() {
                     mediaController?.prepare()
                     mediaController?.play()
                     currentPlayingSound = sound
+
+                    // Save the selected sound to SharedPreferences
+                    val prefs = context.getSharedPreferences(NoizsAppWidget.PREFS_NAME, Context.MODE_PRIVATE)
+                    with(prefs.edit()) {
+                        putInt(NoizsAppWidget.PREF_LAST_SOUND_RES_ID, sound.resourceId)
+                        apply()
+                    }
                 }
             }
         }
