@@ -9,7 +9,7 @@
    id="svg1"
    inkscape:version="1.4.2 (ebf0e94, 2025-05-08)"
    sodipodi:docname="moon_on.svg"
-   inkscape:export-filename="moon.png"
+   inkscape:export-filename="moon_on.png"
    inkscape:export-xdpi="324.53"
    inkscape:export-ydpi="324.53"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
@@ -31,9 +31,9 @@
      inkscape:cy="386.98738"
      inkscape:window-width="2560"
      inkscape:window-height="1334"
-     inkscape:window-x="-11"
-     inkscape:window-y="-11"
-     inkscape:window-maximized="1"
+     inkscape:window-x="-32000"
+     inkscape:window-y="-32000"
+     inkscape:window-maximized="0"
      inkscape:current-layer="layer1" />
   <defs
      id="defs1" />

@@ -30,6 +30,8 @@ Anyone looking for a simple, free app to help them sleep, focus, or relax.
 * **Persistent Compilation Issue:** A persistent `No value passed for parameter 'p1'` compilation error in `SoundService.kt` (specifically within the `onCustomCommand` method of `MediaSession.Callback`) is preventing a successful build. This error is unusual as the method signature appears correct according to Media3 documentation. It may indicate a deeper environmental issue (e.g., Gradle cache, Kotlin plugin version incompatibility, or Android Studio caches).
 * **Raw Audio File Naming:** When adding raw audio files (e.g., MP3s) to `app/src/main/res/raw/`, ensure their filenames contain only lowercase letters (a-z), numbers (0-9), and underscores (`_`). Hyphens (`-`) are not allowed and will cause compilation errors. For example, `white_noise.mp3` is valid, but `white-noise.mp3` is not.
 * **Avoid Legacy Media APIs:** Do not use `android.media.MediaPlayer` or `android.support.v4.media` APIs for media playback or session management, as they are deprecated or less robust compared to AndroidX Media3.
+* **WAKE_LOCK Permission:** Added `android.permission.WAKE_LOCK` to `AndroidManifest.xml` to resolve `SecurityException` during ExoPlayer playback when the screen is off.
+* **Sound Asset Updates:** Sound assets have been updated.
 
 ## 6. User Interface (UI) & User Experience (UX)
 

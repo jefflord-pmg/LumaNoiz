@@ -43,6 +43,7 @@ class SoundService : MediaSessionService() {
 
         player = ExoPlayer.Builder(this)
             .setAudioAttributes(audioAttributes, true)
+            .setWakeMode(C.WAKE_MODE_LOCAL)
             .build().apply {
                 repeatMode = Player.REPEAT_MODE_ONE
                 addListener(object : Player.Listener {
@@ -90,8 +91,12 @@ class SoundService : MediaSessionService() {
 
     private fun playSound(soundResId: Int) {
         val mediaItem = MediaItem.fromUri("android.resource://$packageName/$soundResId")
-        player?.setMediaItem(mediaItem)
-        player?.prepare()
+
+        // Only set media item and prepare if it's a new sound or player is not ready
+        if (player?.currentMediaItem != mediaItem || player?.playbackState == Player.STATE_IDLE) {
+            player?.setMediaItem(mediaItem)
+            player?.prepare()
+        }
         player?.play()
 
         val prefs = getSharedPreferences(NoizsAppWidget.PREFS_NAME, Context.MODE_PRIVATE).edit()
