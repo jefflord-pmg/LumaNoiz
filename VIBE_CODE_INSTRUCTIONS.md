@@ -67,3 +67,7 @@ The app will be completely free. No ads, no in-app purchases.
     *   The activity's interaction with the `SoundService` remains unchanged. It continues to use a `MediaController` to manage playback, which is the correct and recommended approach for an `Activity`. This allows for a more responsive UI within the app itself.
 
 This decoupled approach ensures that the app widget and the service communicate in a way that respects Android's component lifecycle rules, preventing the `ReceiverCallNotAllowedException` and creating a more robust and stable application.
+
+### Widget Preview Image
+
+*   **Preview Image Configuration:** The image displayed in the widget picker (preview image) is configured in the `appwidget-provider` XML file (e.g., `app/src/main/res/xml/noizs_app_widget_info.xml`) using the `android:previewImage` attribute. Ensure this attribute points to a valid drawable resource (e.g., `@drawable/moon_off`) for the preview to display correctly.

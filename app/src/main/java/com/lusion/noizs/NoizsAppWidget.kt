@@ -42,20 +42,8 @@ class NoizsAppWidget : AppWidgetProvider() {
         appWidgetIds: IntArray
     ) {
         for (appWidgetId in appWidgetIds) {
-            // The service will update the widget's state.
-            // Here we just set up the click handler.
-            val views = RemoteViews(context.packageName, R.layout.noizs_app_widget)
-            val intent = Intent(context, NoizsAppWidget::class.java).apply {
-                action = ACTION_TOGGLE_PLAYBACK
-            }
-            val pendingIntent = PendingIntent.getBroadcast(
-                context,
-                appWidgetId,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-            views.setOnClickPendingIntent(R.id.widget_button, pendingIntent)
-            appWidgetManager.updateAppWidget(appWidgetId, views)
+            // Update the widget with the initial state (not playing)
+            updateWidget(context, appWidgetManager, appWidgetId, false)
         }
     }
 
