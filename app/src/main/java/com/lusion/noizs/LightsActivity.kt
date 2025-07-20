@@ -49,6 +49,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
+import android.speech.tts.TextToSpeech
+import java.util.Locale
 
 class LightsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,6 +81,21 @@ fun BallAnimationScreen() {
     val coroutineScope = rememberCoroutineScope()
     val userPreferencesRepository = remember { UserPreferencesRepository(context) }
     val activity = LocalContext.current as? Activity
+
+    val tts = remember {
+        TextToSpeech(context, null).apply {
+            language = Locale.US
+            setPitch(0.8f)
+            setSpeechRate(0.9f)
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            tts.stop()
+            tts.shutdown()
+        }
+    }
 
     val ballSize by userPreferencesRepository.ballSize.collectAsState(initial = 0.1f)
     val minDuration by userPreferencesRepository.minDuration.collectAsState(initial = 100f)
@@ -204,6 +221,8 @@ fun BallAnimationScreen() {
                         isPaused = true
                         showPauseMenu = true
                         isVisible = false
+                        val textToSpeak = "${numberToWords(ballHiddenCount)} times"
+                        tts.speak(textToSpeak, TextToSpeech.QUEUE_FLUSH, null, null)
                     }
                 }
             }
@@ -344,4 +363,22 @@ fun BallAnimationScreen() {
             }
         }
     }
+}
+
+fun numberToWords(number: Int): String {
+    if (number == 0) return "zero"
+
+    val units = arrayOf("", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen")
+    val tens = arrayOf("", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety")
+
+    fun convert(n: Int): String {
+        return when {
+            n < 20 -> units[n]
+            n < 100 -> tens[n / 10] + (if (n % 10 != 0) " " + units[n % 10] else "")
+            n < 1000 -> units[n / 100] + " hundred" + (if (n % 100 != 0) " " + convert(n % 100) else "")
+            else -> ""
+        }
+    }
+
+    return convert(number)
 }
