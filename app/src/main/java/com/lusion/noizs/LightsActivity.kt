@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,6 +44,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
 class LightsActivity : ComponentActivity() {
@@ -70,14 +72,21 @@ class LightsActivity : ComponentActivity() {
 
 @Composable
 fun BallAnimationScreen() {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val userPreferencesRepository = remember { UserPreferencesRepository(context) }
+
+    val ballSize by userPreferencesRepository.ballSize.collectAsState(initial = 0.1f)
+    val minDuration by userPreferencesRepository.minDuration.collectAsState(initial = 100f)
+    val maxDuration by userPreferencesRepository.maxDuration.collectAsState(initial = 2000f)
+    val totalDurationMinutes by userPreferencesRepository.totalDurationMinutes.collectAsState(initial = 10f)
+
     var ballHiddenCount by remember { mutableStateOf(0) }
     var showPauseMenu by remember { mutableStateOf(false) }
     var isPaused by remember { mutableStateOf(false) }
     var isVisible by remember { mutableStateOf(true) }
-    var ballSize by remember { mutableStateOf(0.1f) }
-    var minDuration by remember { mutableStateOf(100f) }
-    var maxDuration by remember { mutableStateOf(2000f) }
     var lastBallSpeed by remember { mutableStateOf(0L) }
+    var timeRemaining by remember { mutableStateOf(totalDurationMinutes * 60 * 1000) }
 
     Box(
         modifier = Modifier
@@ -112,9 +121,21 @@ fun BallAnimationScreen() {
 
             val yOffset = with(LocalDensity.current) { ((screenHeight - ballSizePx) / 2).toDp() }
 
-            LaunchedEffect(isPaused, ballSize, minDuration, maxDuration) {
+            LaunchedEffect(isPaused, ballSize, minDuration, maxDuration, totalDurationMinutes) {
                 if (!isPaused) {
-                    withTimeoutOrNull(10 * 60 * 1000L) { // 10 minutes
+                    val totalDurationMillis = totalDurationMinutes * 60 * 1000
+                    val startTime = System.currentTimeMillis()
+
+                    // Coroutine to update time remaining
+                    val timerJob = launch {
+                        while (isActive) {
+                            val elapsedTime = System.currentTimeMillis() - startTime
+                            timeRemaining = totalDurationMillis - elapsedTime
+                            delay(1000)
+                        }
+                    }
+
+                    withTimeoutOrNull(totalDurationMillis.toLong()) {
                         while (isActive) {
                             // Left to Right
                             isVisible = true
@@ -157,6 +178,7 @@ fun BallAnimationScreen() {
                             xPosition.snapTo(-ballSizePx)
                         }
                     }
+                    timerJob.cancel()
                 }
             }
 
@@ -198,6 +220,15 @@ fun BallAnimationScreen() {
                         fontSize = 16.sp
                     )
                 }
+                if (timeRemaining > 0) {
+                    val minutes = TimeUnit.MILLISECONDS.toMinutes(timeRemaining.toLong())
+                    val seconds = TimeUnit.MILLISECONDS.toSeconds(timeRemaining.toLong()) % 60
+                    Text(
+                        text = "Time Remaining: %02d:%02d".format(minutes, seconds),
+                        color = Color.White,
+                        fontSize = 16.sp
+                    )
+                }
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     Button(
@@ -225,7 +256,9 @@ fun BallAnimationScreen() {
                 Text("Ball Size", color = Color.White)
                 Slider(
                     value = ballSize,
-                    onValueChange = { ballSize = it },
+                    onValueChange = { newSize ->
+                        coroutineScope.launch { userPreferencesRepository.setBallSize(newSize) }
+                    },
                     valueRange = 0f..1f,
                     modifier = Modifier.width(200.dp)
                 )
@@ -237,7 +270,9 @@ fun BallAnimationScreen() {
                 }
                 Slider(
                     value = minDuration,
-                    onValueChange = { minDuration = it.coerceAtMost(maxDuration - 1) },
+                    onValueChange = { newDuration ->
+                        coroutineScope.launch { userPreferencesRepository.setMinDuration(newDuration.coerceAtMost(maxDuration - 1)) }
+                    },
                     valueRange = 100f..5000f,
                     modifier = Modifier.width(200.dp)
                 )
@@ -249,8 +284,24 @@ fun BallAnimationScreen() {
                 }
                 Slider(
                     value = maxDuration,
-                    onValueChange = { maxDuration = it.coerceAtLeast(minDuration + 1) },
+                    onValueChange = { newDuration ->
+                        coroutineScope.launch { userPreferencesRepository.setMaxDuration(newDuration.coerceAtLeast(minDuration + 1)) }
+                    },
                     valueRange = 100f..5000f,
+                    modifier = Modifier.width(200.dp)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Total Duration", color = Color.White, modifier = Modifier.width(120.dp))
+                    Text("${totalDurationMinutes.toInt()} min", color = Color.White)
+                }
+                Slider(
+                    value = totalDurationMinutes,
+                    onValueChange = { newMinutes ->
+                        coroutineScope.launch { userPreferencesRepository.setTotalDurationMinutes(newMinutes) }
+                    },
+                    valueRange = 1f..60f,
                     modifier = Modifier.width(200.dp)
                 )
             }
