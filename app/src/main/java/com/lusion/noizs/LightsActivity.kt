@@ -86,7 +86,8 @@ fun BallAnimationScreen() {
     var isPaused by remember { mutableStateOf(false) }
     var isVisible by remember { mutableStateOf(true) }
     var lastBallSpeed by remember { mutableStateOf(0L) }
-    var timeRemaining by remember { mutableStateOf(totalDurationMinutes * 60 * 1000) }
+    var timeRemaining by remember { mutableStateOf((totalDurationMinutes * 60 * 1000).toLong()) }
+    var animationKey by remember { mutableStateOf(0) } // Key to restart animation
 
     Box(
         modifier = Modifier
@@ -121,21 +122,21 @@ fun BallAnimationScreen() {
 
             val yOffset = with(LocalDensity.current) { ((screenHeight - ballSizePx) / 2).toDp() }
 
-            LaunchedEffect(isPaused, ballSize, minDuration, maxDuration, totalDurationMinutes) {
+            LaunchedEffect(isPaused, ballSize, minDuration, maxDuration, totalDurationMinutes, animationKey) {
                 if (!isPaused) {
-                    val totalDurationMillis = totalDurationMinutes * 60 * 1000
+                    val animationDuration = timeRemaining
                     val startTime = System.currentTimeMillis()
 
                     // Coroutine to update time remaining
                     val timerJob = launch {
                         while (isActive) {
                             val elapsedTime = System.currentTimeMillis() - startTime
-                            timeRemaining = totalDurationMillis - elapsedTime
+                            timeRemaining = (animationDuration - elapsedTime).coerceAtLeast(0)
                             delay(1000)
                         }
                     }
 
-                    withTimeoutOrNull(totalDurationMillis.toLong()) {
+                    val result = withTimeoutOrNull(animationDuration) {
                         while (isActive) {
                             // Left to Right
                             isVisible = true
@@ -179,6 +180,11 @@ fun BallAnimationScreen() {
                         }
                     }
                     timerJob.cancel()
+                    if (result == null) { // Timeout occurred
+                        isPaused = true
+                        showPauseMenu = true
+                        isVisible = false
+                    }
                 }
             }
 
@@ -202,8 +208,10 @@ fun BallAnimationScreen() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.pointerInput(Unit) {
                     detectTapGestures(onLongPress = {
-                        isPaused = false
-                        showPauseMenu = false
+                        if (timeRemaining > 0) {
+                            isPaused = false
+                            showPauseMenu = false
+                        }
                     })
                 }
             ) {
@@ -236,6 +244,7 @@ fun BallAnimationScreen() {
                             isPaused = false
                             showPauseMenu = false
                         },
+                        enabled = timeRemaining > 0,
                         modifier = Modifier.size(width = 120.dp, height = 60.dp)
                     ) {
                         Text("Resume")
@@ -243,6 +252,8 @@ fun BallAnimationScreen() {
                     Button(
                         onClick = {
                             ballHiddenCount = 0
+                            timeRemaining = (totalDurationMinutes * 60 * 1000).toLong()
+                            animationKey++ // This will re-trigger the LaunchedEffect
                             isPaused = false
                             showPauseMenu = false
                         },
