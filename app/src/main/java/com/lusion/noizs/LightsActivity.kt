@@ -1,5 +1,7 @@
 package com.lusion.noizs
 
+import android.app.Activity
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -28,6 +30,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -75,20 +78,29 @@ fun BallAnimationScreen() {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val userPreferencesRepository = remember { UserPreferencesRepository(context) }
+    val activity = LocalContext.current as? Activity
 
     val ballSize by userPreferencesRepository.ballSize.collectAsState(initial = 0.1f)
     val minDuration by userPreferencesRepository.minDuration.collectAsState(initial = 100f)
     val maxDuration by userPreferencesRepository.maxDuration.collectAsState(initial = 2000f)
     val totalDurationMinutes by userPreferencesRepository.totalDurationMinutes.collectAsState(initial = 10f)
 
-    var ballHiddenCount by remember { mutableStateOf(0) }
-    var showPauseMenu by remember { mutableStateOf(false) }
-    var isPaused by remember { mutableStateOf(false) }
-    var isVisible by remember { mutableStateOf(true) }
-    var lastBallSpeed by remember { mutableStateOf(0L) }
-    var timeRemaining by remember { mutableStateOf(0L) }
-    var animationKey by remember { mutableStateOf(0) } // Key to restart animation
-    var initialDurationLoaded by remember { mutableStateOf(false) }
+    var ballHiddenCount by rememberSaveable { mutableStateOf(0) }
+    var showPauseMenu by rememberSaveable { mutableStateOf(false) }
+    var isPaused by rememberSaveable { mutableStateOf(false) }
+    var isVisible by rememberSaveable { mutableStateOf(true) }
+    var lastBallSpeed by rememberSaveable { mutableStateOf(0L) }
+    var timeRemaining by rememberSaveable { mutableStateOf(0L) }
+    var animationKey by rememberSaveable { mutableStateOf(0) } // Key to restart animation
+    var initialDurationLoaded by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(showPauseMenu) {
+        if (showPauseMenu) {
+            activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        } else {
+            activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        }
+    }
 
     LaunchedEffect(totalDurationMinutes) {
         if (!initialDurationLoaded) {
