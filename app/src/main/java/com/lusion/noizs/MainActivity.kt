@@ -2,16 +2,12 @@ package com.lusion.noizs
 
 import android.content.ComponentName
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,8 +18,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -44,10 +38,8 @@ import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaItem
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
-import com.google.common.util.concurrent.Futures
-import com.google.common.util.concurrent.ListenableFuture
 import com.lusion.noizs.ui.theme.NoizsAppTheme
-import android.content.Context
+import android.content.Intent
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -100,116 +92,83 @@ fun NoizsAppScreen() {
         )
     }
 
-    // Observe playback state from MediaController
-    LaunchedEffect(mediaController) {
-        mediaController?.addListener(object : androidx.media3.common.Player.Listener {
-            override fun onIsPlayingChanged(isPlayingValue: Boolean) {
-                isPlaying = isPlayingValue
-            }
-
-            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-                currentPlayingSound = mediaItem?.mediaMetadata?.title?.toString()?.let { name ->
-                    sounds.find { it.name == name }
-                }
-            }
-        })
+    DisposableEffect(Unit) {
+        onDispose {
+            mediaController?.release()
+        }
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF121212)) // Dark background
             .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Noizs App",
+            text = "Noizs",
             style = MaterialTheme.typography.headlineLarge,
-            color = Color.White,
-            modifier = Modifier.padding(bottom = 32.dp)
+            modifier = Modifier.padding(bottom = 16.dp)
         )
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             contentPadding = PaddingValues(8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(sounds) { sound ->
-                SoundCard(sound = sound, isEnabled = mediaController != null) {
-                    Log.d("NoizsApp", "SoundCard clicked: ${sound.name}")
-                    val mediaItem = MediaItem.Builder()
-                        .setMediaId(sound.resourceId.toString())
-                        .setUri("android.resource://" + context.packageName + "/" + sound.resourceId)
-                        .setMediaMetadata(
-                            androidx.media3.common.MediaMetadata.Builder()
-                                .setTitle(sound.name)
-                                .build()
-                        )
-                        .build()
-                    mediaController?.setMediaItem(mediaItem)
-                    mediaController?.prepare()
-                    mediaController?.play()
-                    currentPlayingSound = sound
-
-                    // Save the selected sound to SharedPreferences
-                    val prefs = context.getSharedPreferences(NoizsAppWidget.PREFS_NAME, Context.MODE_PRIVATE)
-                    with(prefs.edit()) {
-                        putInt(NoizsAppWidget.PREF_LAST_SOUND_RES_ID, sound.resourceId)
-                        apply()
+                SoundCard(
+                    sound = sound,
+                    isPlaying = sound == currentPlayingSound && isPlaying,
+                    onClick = {
+                        if (sound == currentPlayingSound) {
+                            if (isPlaying) {
+                                mediaController?.pause()
+                            } else {
+                                mediaController?.play()
+                            }
+                            isPlaying = !isPlaying
+                        } else {
+                            mediaController?.apply {
+                                setMediaItem(MediaItem.fromUri("android.resource://${context.packageName}/${sound.resourceId}"))
+                                prepare()
+                                play()
+                            }
+                            currentPlayingSound = sound
+                            isPlaying = true
+                        }
                     }
-                }
+                )
             }
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // Playback Controls
-        if (currentPlayingSound != null) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceAround,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = "Playing: ${currentPlayingSound?.name}",
-                    color = Color.White,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                Button(
-                    onClick = {
-                        if (isPlaying) {
-                            mediaController?.pause()
-                        } else {
-                            mediaController?.play()
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFBB86FC))
-                ) {
-                    Text(text = if (isPlaying) "Pause" else "Play", color = Color.White)
-                }
-            }
+        Button(onClick = {
+            val intent = Intent(context, LightsActivity::class.java)
+            context.startActivity(intent)
+        }) {
+            Text("Go to Lights")
         }
     }
 }
 
 @Composable
-fun SoundCard(sound: Sound, isEnabled: Boolean, onClick: () -> Unit) {
+fun SoundCard(sound: Sound, isPlaying: Boolean, onClick: () -> Unit) {
     Button(
         onClick = onClick,
-        enabled = isEnabled,
+        enabled = true,
         modifier = Modifier
             .fillMaxWidth()
             .height(120.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFF333333),
+            containerColor = if (isPlaying) Color.DarkGray else Color(0xFF333333),
             disabledContainerColor = Color(0xFF666666)
         )
     ) {
         Text(
             text = sound.name,
-            color = if (isEnabled) Color.White else Color.Gray,
+            color = Color.White,
             style = MaterialTheme.typography.titleMedium
         )
     }
