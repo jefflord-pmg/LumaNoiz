@@ -91,10 +91,16 @@ fun BallAnimationScreen() {
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
             val screenWidth = with(LocalDensity.current) { maxWidth.toPx() }
             val screenHeight = with(LocalDensity.current) { maxHeight.toPx() }
+            val isPortrait = screenHeight > screenWidth
 
             val minBallSizePx = screenWidth * 0.01f
             val maxBallSizePx = screenHeight
-            val ballSizePx = minBallSizePx + (maxBallSizePx - minBallSizePx) * sliderValue
+            var ballSizePx = minBallSizePx + (maxBallSizePx - minBallSizePx) * sliderValue
+
+            if (isPortrait) {
+                ballSizePx *= 0.5f
+            }
+
             val ballSizeDp = with(LocalDensity.current) { ballSizePx.toDp() }
 
             val xPosition = remember { Animatable(0f) }
@@ -109,7 +115,7 @@ fun BallAnimationScreen() {
                             isVisible = true
                             val durationLtr = Random.nextLong(100, 2000)
                             xPosition.animateTo(
-                                targetValue = screenWidth - ballSizePx,
+                                targetValue = screenWidth,
                                 animationSpec = tween(
                                     durationMillis = durationLtr.toInt(),
                                     easing = LinearEasing
@@ -122,13 +128,13 @@ fun BallAnimationScreen() {
                             delay(1000)
 
                             // Teleport to right edge before animating back
-                            xPosition.snapTo(screenWidth - ballSizePx)
+                            xPosition.snapTo(screenWidth)
 
                             // Right to Left
                             isVisible = true
                             val durationRtl = Random.nextLong(100, 2000)
                             xPosition.animateTo(
-                                targetValue = 0f,
+                                targetValue = -ballSizePx,
                                 animationSpec = tween(
                                     durationMillis = durationRtl.toInt(),
                                     easing = LinearEasing
@@ -141,7 +147,7 @@ fun BallAnimationScreen() {
                             delay(2000)
 
                             // Teleport to left edge
-                            xPosition.snapTo(0f)
+                            xPosition.snapTo(-ballSizePx)
                         }
                     }
                 }
