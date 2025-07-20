@@ -86,8 +86,16 @@ fun BallAnimationScreen() {
     var isPaused by remember { mutableStateOf(false) }
     var isVisible by remember { mutableStateOf(true) }
     var lastBallSpeed by remember { mutableStateOf(0L) }
-    var timeRemaining by remember { mutableStateOf((totalDurationMinutes * 60 * 1000).toLong()) }
+    var timeRemaining by remember { mutableStateOf(0L) }
     var animationKey by remember { mutableStateOf(0) } // Key to restart animation
+    var initialDurationLoaded by remember { mutableStateOf(false) }
+
+    LaunchedEffect(totalDurationMinutes) {
+        if (!initialDurationLoaded) {
+            timeRemaining = (totalDurationMinutes * 60 * 1000).toLong()
+            initialDurationLoaded = true
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -204,117 +212,123 @@ fun BallAnimationScreen() {
 
         if (showPauseMenu) {
             // Ball Pause Menu
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.pointerInput(Unit) {
-                    detectTapGestures(onLongPress = {
-                        if (timeRemaining > 0) {
-                            isPaused = false
-                            showPauseMenu = false
-                        }
-                    })
-                }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .pointerInput(Unit) {
+                        detectTapGestures(onLongPress = {
+                            if (timeRemaining > 0) {
+                                isPaused = false
+                                showPauseMenu = false
+                            }
+                        })
+                    },
+                contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = ballHiddenCount.toString(),
-                    color = Color.White,
-                    fontSize = 48.sp
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                if (lastBallSpeed > 0) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     Text(
-                        text = "Last Speed: ${lastBallSpeed}ms",
+                        text = ballHiddenCount.toString(),
                         color = Color.White,
-                        fontSize = 16.sp
+                        fontSize = 48.sp
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    if (lastBallSpeed > 0) {
+                        Text(
+                            text = "Last Speed: ${lastBallSpeed}ms",
+                            color = Color.White,
+                            fontSize = 16.sp
+                        )
+                    }
+                    if (timeRemaining > 0) {
+                        val minutes = TimeUnit.MILLISECONDS.toMinutes(timeRemaining)
+                        val seconds = TimeUnit.MILLISECONDS.toSeconds(timeRemaining) % 60
+                        Text(
+                            text = "Time Remaining: %02d:%02d".format(minutes, seconds),
+                            color = Color.White,
+                            fontSize = 16.sp
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Button(
+                            onClick = {
+                                isPaused = false
+                                showPauseMenu = false
+                            },
+                            enabled = timeRemaining > 0,
+                            modifier = Modifier.size(width = 120.dp, height = 60.dp)
+                        ) {
+                            Text("Resume")
+                        }
+                        Button(
+                            onClick = {
+                                ballHiddenCount = 0
+                                timeRemaining = (totalDurationMinutes * 60 * 1000).toLong()
+                                animationKey++ // This will re-trigger the LaunchedEffect
+                                isPaused = false
+                                showPauseMenu = false
+                            },
+                            modifier = Modifier.size(width = 120.dp, height = 60.dp)
+                        ) {
+                            Text("Restart")
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    Text("Ball Size", color = Color.White)
+                    Slider(
+                        value = ballSize,
+                        onValueChange = { newSize ->
+                            coroutineScope.launch { userPreferencesRepository.setBallSize(newSize) }
+                        },
+                        valueRange = 0f..1f,
+                        modifier = Modifier.width(200.dp)
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("Min Ball Speed", color = Color.White, modifier = Modifier.width(120.dp))
+                        Text("${minDuration.toInt()}ms", color = Color.White)
+                    }
+                    Slider(
+                        value = minDuration,
+                        onValueChange = { newDuration ->
+                            coroutineScope.launch { userPreferencesRepository.setMinDuration(newDuration.coerceAtMost(maxDuration - 1)) }
+                        },
+                        valueRange = 100f..5000f,
+                        modifier = Modifier.width(200.dp)
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("Max Ball Speed", color = Color.White, modifier = Modifier.width(120.dp))
+                        Text("${maxDuration.toInt()}ms", color = Color.White)
+                    }
+                    Slider(
+                        value = maxDuration,
+                        onValueChange = { newDuration ->
+                            coroutineScope.launch { userPreferencesRepository.setMaxDuration(newDuration.coerceAtLeast(minDuration + 1)) }
+                        },
+                        valueRange = 100f..5000f,
+                        modifier = Modifier.width(200.dp)
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("Total Duration", color = Color.White, modifier = Modifier.width(120.dp))
+                        Text("${totalDurationMinutes.toInt()} min", color = Color.White)
+                    }
+                    Slider(
+                        value = totalDurationMinutes,
+                        onValueChange = { newMinutes ->
+                            coroutineScope.launch { userPreferencesRepository.setTotalDurationMinutes(newMinutes) }
+                        },
+                        valueRange = 1f..10f,
+                        modifier = Modifier.width(200.dp)
                     )
                 }
-                if (timeRemaining > 0) {
-                    val minutes = TimeUnit.MILLISECONDS.toMinutes(timeRemaining.toLong())
-                    val seconds = TimeUnit.MILLISECONDS.toSeconds(timeRemaining.toLong()) % 60
-                    Text(
-                        text = "Time Remaining: %02d:%02d".format(minutes, seconds),
-                        color = Color.White,
-                        fontSize = 16.sp
-                    )
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Button(
-                        onClick = {
-                            isPaused = false
-                            showPauseMenu = false
-                        },
-                        enabled = timeRemaining > 0,
-                        modifier = Modifier.size(width = 120.dp, height = 60.dp)
-                    ) {
-                        Text("Resume")
-                    }
-                    Button(
-                        onClick = {
-                            ballHiddenCount = 0
-                            timeRemaining = (totalDurationMinutes * 60 * 1000).toLong()
-                            animationKey++ // This will re-trigger the LaunchedEffect
-                            isPaused = false
-                            showPauseMenu = false
-                        },
-                        modifier = Modifier.size(width = 120.dp, height = 60.dp)
-                    ) {
-                        Text("Restart")
-                    }
-                }
-                Spacer(modifier = Modifier.height(32.dp))
-
-                Text("Ball Size", color = Color.White)
-                Slider(
-                    value = ballSize,
-                    onValueChange = { newSize ->
-                        coroutineScope.launch { userPreferencesRepository.setBallSize(newSize) }
-                    },
-                    valueRange = 0f..1f,
-                    modifier = Modifier.width(200.dp)
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Min Ball Speed", color = Color.White, modifier = Modifier.width(120.dp))
-                    Text("${minDuration.toInt()}ms", color = Color.White)
-                }
-                Slider(
-                    value = minDuration,
-                    onValueChange = { newDuration ->
-                        coroutineScope.launch { userPreferencesRepository.setMinDuration(newDuration.coerceAtMost(maxDuration - 1)) }
-                    },
-                    valueRange = 100f..5000f,
-                    modifier = Modifier.width(200.dp)
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Max Ball Speed", color = Color.White, modifier = Modifier.width(120.dp))
-                    Text("${maxDuration.toInt()}ms", color = Color.White)
-                }
-                Slider(
-                    value = maxDuration,
-                    onValueChange = { newDuration ->
-                        coroutineScope.launch { userPreferencesRepository.setMaxDuration(newDuration.coerceAtLeast(minDuration + 1)) }
-                    },
-                    valueRange = 100f..5000f,
-                    modifier = Modifier.width(200.dp)
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Total Duration", color = Color.White, modifier = Modifier.width(120.dp))
-                    Text("${totalDurationMinutes.toInt()} min", color = Color.White)
-                }
-                Slider(
-                    value = totalDurationMinutes,
-                    onValueChange = { newMinutes ->
-                        coroutineScope.launch { userPreferencesRepository.setTotalDurationMinutes(newMinutes) }
-                    },
-                    valueRange = 1f..60f,
-                    modifier = Modifier.width(200.dp)
-                )
             }
         }
     }
