@@ -18,9 +18,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
@@ -69,10 +71,13 @@ class LightsActivity : ComponentActivity() {
 @Composable
 fun BallAnimationScreen() {
     var ballHiddenCount by remember { mutableStateOf(0) }
-    var showCounter by remember { mutableStateOf(false) }
+    var showPauseMenu by remember { mutableStateOf(false) }
     var isPaused by remember { mutableStateOf(false) }
     var isVisible by remember { mutableStateOf(true) }
-    var sliderValue by remember { mutableStateOf(0.1f) }
+    var ballSize by remember { mutableStateOf(0.1f) }
+    var minDuration by remember { mutableStateOf(100f) }
+    var maxDuration by remember { mutableStateOf(2000f) }
+    var lastBallSpeed by remember { mutableStateOf(0L) }
 
     Box(
         modifier = Modifier
@@ -81,7 +86,7 @@ fun BallAnimationScreen() {
                 detectTapGestures(
                     onLongPress = {
                         isPaused = true
-                        showCounter = true
+                        showPauseMenu = true
                         isVisible = false
                     }
                 )
@@ -95,7 +100,7 @@ fun BallAnimationScreen() {
 
             val minBallSizePx = screenWidth * 0.01f
             val maxBallSizePx = screenHeight
-            var ballSizePx = minBallSizePx + (maxBallSizePx - minBallSizePx) * sliderValue
+            var ballSizePx = minBallSizePx + (maxBallSizePx - minBallSizePx) * ballSize
 
             if (isPortrait) {
                 ballSizePx *= 0.5f
@@ -107,13 +112,14 @@ fun BallAnimationScreen() {
 
             val yOffset = with(LocalDensity.current) { ((screenHeight - ballSizePx) / 2).toDp() }
 
-            LaunchedEffect(isPaused, sliderValue) {
+            LaunchedEffect(isPaused, ballSize, minDuration, maxDuration) {
                 if (!isPaused) {
                     withTimeoutOrNull(10 * 60 * 1000L) { // 10 minutes
                         while (isActive) {
                             // Left to Right
                             isVisible = true
-                            val durationLtr = Random.nextLong(100, 2000)
+                            val durationLtr = Random.nextLong(minDuration.toLong(), maxDuration.toLong())
+                            lastBallSpeed = durationLtr
                             xPosition.animateTo(
                                 targetValue = screenWidth,
                                 animationSpec = tween(
@@ -132,7 +138,8 @@ fun BallAnimationScreen() {
 
                             // Right to Left
                             isVisible = true
-                            val durationRtl = Random.nextLong(100, 2000)
+                            val durationRtl = Random.nextLong(minDuration.toLong(), maxDuration.toLong())
+                            lastBallSpeed = durationRtl
                             xPosition.animateTo(
                                 targetValue = -ballSizePx,
                                 animationSpec = tween(
@@ -167,34 +174,83 @@ fun BallAnimationScreen() {
             }
         }
 
-        if (showCounter) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        if (showPauseMenu) {
+            // Ball Pause Menu
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.pointerInput(Unit) {
+                    detectTapGestures(onLongPress = {
+                        isPaused = false
+                        showPauseMenu = false
+                    })
+                }
+            ) {
                 Text(
                     text = ballHiddenCount.toString(),
                     color = Color.White,
                     fontSize = 48.sp
                 )
+                Spacer(modifier = Modifier.height(8.dp))
+                if (lastBallSpeed > 0) {
+                    Text(
+                        text = "Last Speed: ${lastBallSpeed}ms",
+                        color = Color.White,
+                        fontSize = 16.sp
+                    )
+                }
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Button(onClick = {
-                        isPaused = false
-                        showCounter = false
-                    }) {
+                    Button(
+                        onClick = {
+                            isPaused = false
+                            showPauseMenu = false
+                        },
+                        modifier = Modifier.size(width = 120.dp, height = 60.dp)
+                    ) {
                         Text("Resume")
                     }
-                    Button(onClick = {
-                        ballHiddenCount = 0
-                        isPaused = false
-                        showCounter = false
-                    }) {
+                    Button(
+                        onClick = {
+                            ballHiddenCount = 0
+                            isPaused = false
+                            showPauseMenu = false
+                        },
+                        modifier = Modifier.size(width = 120.dp, height = 60.dp)
+                    ) {
                         Text("Restart")
                     }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(32.dp))
+
+                Text("Ball Size", color = Color.White)
                 Slider(
-                    value = sliderValue,
-                    onValueChange = { sliderValue = it },
+                    value = ballSize,
+                    onValueChange = { ballSize = it },
                     valueRange = 0f..1f,
+                    modifier = Modifier.width(200.dp)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Min Ball Speed", color = Color.White, modifier = Modifier.width(120.dp))
+                    Text("${minDuration.toInt()}ms", color = Color.White)
+                }
+                Slider(
+                    value = minDuration,
+                    onValueChange = { minDuration = it.coerceAtMost(maxDuration - 1) },
+                    valueRange = 100f..5000f,
+                    modifier = Modifier.width(200.dp)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Max Ball Speed", color = Color.White, modifier = Modifier.width(120.dp))
+                    Text("${maxDuration.toInt()}ms", color = Color.White)
+                }
+                Slider(
+                    value = maxDuration,
+                    onValueChange = { maxDuration = it.coerceAtLeast(minDuration + 1) },
+                    valueRange = 100f..5000f,
                     modifier = Modifier.width(200.dp)
                 )
             }
