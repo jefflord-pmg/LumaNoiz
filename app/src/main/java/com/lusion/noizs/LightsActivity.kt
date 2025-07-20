@@ -190,7 +190,7 @@ fun BallAnimationScreen() {
                             // Pause at right
                             isVisible = false
                             ballHiddenCount++
-                            delay(1000)
+                            delay(Random.nextLong(300, 3001))
 
                             // Teleport to right edge before animating back
                             xPosition.snapTo(screenWidth)
@@ -210,7 +210,7 @@ fun BallAnimationScreen() {
                             // Pause at left
                             isVisible = false
                             ballHiddenCount++
-                            delay(2000)
+                            delay(Random.nextLong(300, 1501))
 
                             // Teleport to left edge
                             xPosition.snapTo(-ballSizePx)
