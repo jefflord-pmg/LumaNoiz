@@ -19,8 +19,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -69,7 +71,8 @@ fun BallAnimationScreen() {
     var ballHiddenCount by remember { mutableStateOf(0) }
     var showCounter by remember { mutableStateOf(false) }
     var isPaused by remember { mutableStateOf(false) }
-    val coroutineScope = rememberCoroutineScope()
+    var isVisible by remember { mutableStateOf(true) }
+    var sliderValue by remember { mutableStateOf(0.1f) }
 
     Box(
         modifier = Modifier
@@ -79,6 +82,7 @@ fun BallAnimationScreen() {
                     onLongPress = {
                         isPaused = true
                         showCounter = true
+                        isVisible = false
                     }
                 )
             },
@@ -87,15 +91,17 @@ fun BallAnimationScreen() {
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
             val screenWidth = with(LocalDensity.current) { maxWidth.toPx() }
             val screenHeight = with(LocalDensity.current) { maxHeight.toPx() }
-            val ballSize = 50.dp
-            val ballSizePx = with(LocalDensity.current) { ballSize.toPx() }
+
+            val minBallSizePx = screenWidth * 0.01f
+            val maxBallSizePx = screenHeight
+            val ballSizePx = minBallSizePx + (maxBallSizePx - minBallSizePx) * sliderValue
+            val ballSizeDp = with(LocalDensity.current) { ballSizePx.toDp() }
 
             val xPosition = remember { Animatable(0f) }
-            var isVisible by remember { mutableStateOf(true) }
 
             val yOffset = with(LocalDensity.current) { ((screenHeight - ballSizePx) / 2).toDp() }
 
-            LaunchedEffect(isPaused) {
+            LaunchedEffect(isPaused, sliderValue) {
                 if (!isPaused) {
                     withTimeoutOrNull(10 * 60 * 1000L) { // 10 minutes
                         while (isActive) {
@@ -144,7 +150,7 @@ fun BallAnimationScreen() {
             if (isVisible) {
                 Canvas(
                     modifier = Modifier
-                        .size(ballSize)
+                        .size(ballSizeDp)
                         .offset(
                             x = with(LocalDensity.current) { xPosition.value.toDp() },
                             y = yOffset
@@ -178,6 +184,13 @@ fun BallAnimationScreen() {
                         Text("Restart")
                     }
                 }
+                Spacer(modifier = Modifier.height(16.dp))
+                Slider(
+                    value = sliderValue,
+                    onValueChange = { sliderValue = it },
+                    valueRange = 0f..1f,
+                    modifier = Modifier.width(200.dp)
+                )
             }
         }
     }
