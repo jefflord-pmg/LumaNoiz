@@ -15,17 +15,17 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
-        android:theme="@style/Theme.NoizsApp"
+        android:theme="@style/Theme.LumaNoizApp"
         tools:targetApi="31">
         <activity
             android:name=".LightsActivity"
             android:exported="false"
-            android:theme="@style/Theme.NoizsApp">
+            android:theme="@style/Theme.LumaNoizApp">
         </activity>
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.NoizsApp">
+            android:theme="@style/Theme.LumaNoizApp">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -41,12 +41,12 @@
             </intent-filter>
         </service>
 
-        <receiver android:name=".NoizsAppWidget" android:exported="false">
+        <receiver android:name=".LumaNoizAppWidget" android:exported="false">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
             <meta-data android:name="android.appwidget.provider"
-                android:resource="@xml/noizs_app_widget_info" />
+                android:resource="@xml/lumanoiz_app_widget_info" />
         </receiver>
 
     </application>

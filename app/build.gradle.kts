@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.lusion.noizs"
+    namespace = "com.lusion.lumanoiz"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.lusion.noizs"
+        applicationId = "com.lusion.lumanoiz"
         minSdk = 29
         targetSdk = 36
         versionCode = 1

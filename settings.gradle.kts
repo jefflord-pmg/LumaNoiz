@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Noizs"
+rootProject.name = "LumaNoiz"
 include(":app")
