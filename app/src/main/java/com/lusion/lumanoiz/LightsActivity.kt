@@ -221,7 +221,8 @@ fun BallAnimationScreen() {
                         isPaused = true
                         showPauseMenu = true
                         isVisible = false
-                        val textToSpeak = "${numberToWords(ballHiddenCount)} times"
+                        val finalCount = if (ballHiddenCount > 0) ballHiddenCount - 1 else 0
+                        val textToSpeak = "${numberToWords(finalCount)} times"
                         tts.speak(textToSpeak, TextToSpeech.QUEUE_FLUSH, null, null)
                     }
                 }
@@ -259,8 +260,9 @@ fun BallAnimationScreen() {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    val displayCount = if (ballHiddenCount > 0) ballHiddenCount - 1 else 0
                     Text(
-                        text = ballHiddenCount.toString(),
+                        text = displayCount.toString(),
                         color = Color.White,
                         fontSize = 48.sp
                     )
