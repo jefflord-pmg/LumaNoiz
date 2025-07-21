@@ -23,13 +23,14 @@
 
 ## 🎯 About
 
-Noizs is a minimalist Android application designed to help users achieve better sleep and relaxation through high-quality ambient soundscapes. The app provides a carefully curated selection of noise types including white noise, brown noise, grey noise, and pink noise, all optimized for continuous background playback.
+Noizs is a minimalist Android application designed to help users achieve better sleep and relaxation through high-quality ambient soundscapes and visual therapy techniques. The app provides a carefully curated selection of noise types including white noise, brown noise, grey noise, and pink noise, all optimized for continuous background playback, plus a customizable ball animation feature for focus and visual therapy.
 
 ### Why Noizs?
 
 - **Sleep Enhancement**: Ambient sounds help mask disruptive environmental noise
-- **Focus Improvement**: Background noise can enhance concentration during work or study
-- **Relaxation Aid**: Gentle soundscapes promote stress reduction and mental calm
+- **Focus Improvement**: Background noise and visual therapy can enhance concentration during work or study
+- **Relaxation Aid**: Gentle soundscapes and calming animations promote stress reduction and mental calm
+- **Visual Therapy**: Customizable ball animation for focus training and visual relaxation
 - **Completely Free**: No ads, no in-app purchases, no user tracking
 - **Simple Design**: Intuitive interface designed for ease of use, especially at night
 
@@ -41,6 +42,8 @@ Anyone looking for a simple, free app to help them sleep, focus, or relax, inclu
 - Meditation practitioners
 - Parents helping children sleep
 - Anyone dealing with tinnitus or anxiety
+- Individuals using visual therapy techniques for focus and relaxation
+- People with ADHD or attention difficulties who benefit from controlled visual stimulation
 
 ## ✨ Features
 
@@ -61,18 +64,38 @@ Anyone looking for a simple, free app to help them sleep, focus, or relax, inclu
 - **Jetpack Compose UI**: Modern, responsive interface
 - **Simple Navigation**: Intuitive sound selection grid
 - **Clear Controls**: Easy-to-use play/pause functionality
+- **Adaptive Layout**: Long-press main screen to toggle UI anchoring to bottom
+- **Visual Therapy Mode**: Full-screen ball animation with customizable settings
 
 ### 🔧 System Integration
 - **Notification Controls**: Media controls in notification panel for quick access
 - **Home Screen Widget**: One-tap play/pause directly from your home screen
 - **No Login Required**: Start using immediately without accounts or setup
 - **Minimal Permissions**: Only requests necessary permissions for audio playback
+- **Persistent Preferences**: Settings saved automatically using DataStore
+
+### 🎯 Visual Therapy Features
+- **"Show Lights" Animation**: Relaxing ball animation for focus and visual therapy
+- **Customizable Ball Settings**: Adjustable ball size, speed (100-5000ms), and session duration (1-10 minutes)
+- **Adaptive Display**: Animation adjusts to screen orientation and size
+- **Interactive Controls**: Long-press to pause/resume and access settings
+- **Session Management**: Timer-based sessions with automatic completion
+- **Text-to-Speech Feedback**: Voice announcement of session results
+- **Progress Tracking**: Real-time display of remaining time and ball movement count
 
 ## 📱 Screenshots
+
+*Main App Interface:*
+- Sound selection grid with six ambient sound options
+- "Show Lights" button for accessing visual therapy mode
 
 *Widget States:*
 - Moon off icon: When no sound is playing
 - Moon on icon: When sound is actively playing
+
+*Visual Therapy Mode:*
+- Full-screen ball animation with customizable settings
+- Pause menu with controls for ball size, speed, and duration
 
 *Note: Screenshots and app previews can be found in the repository's image files.*
 
@@ -131,6 +154,19 @@ To build and modify the app, you'll need:
 3. **Start Playback**: Tap your preferred sound to begin playing
 4. **Control Playback**: Use the play/pause controls within the app
 5. **Background Use**: Minimize the app - audio continues playing
+6. **Access Visual Therapy**: Tap "Show Lights" button for ball animation mode
+
+### Visual Therapy Mode
+
+1. **Enter Mode**: Tap the "Show Lights" button on main screen
+2. **Start Session**: Animation begins automatically with default settings
+3. **Pause/Settings**: Long-press anywhere on screen to pause and access settings
+4. **Customize Settings**: 
+   - Adjust ball size with slider
+   - Set minimum and maximum ball speed (100-5000ms)
+   - Choose session duration (1-10 minutes)
+5. **Resume/Restart**: Use "Resume" to continue or "Restart" for new session
+6. **Session Completion**: Audio announcement when timer expires
 
 ### Notification Controls
 
@@ -154,6 +190,9 @@ When audio is playing, you'll see a notification with:
 - **Sleep Mode**: Enable Do Not Disturb to prevent other notifications
 - **Battery**: App is optimized for minimal battery usage during playback
 - **Storage**: All sounds are stored locally - no internet required after install
+- **Layout Preference**: Long-press main screen to anchor controls to bottom
+- **Visual Therapy**: Use in dark environment for best ball animation visibility
+- **Focus Sessions**: Start with shorter durations (1-3 minutes) and gradually increase
 
 ## 🔧 Technical Details
 
@@ -170,8 +209,10 @@ When audio is playing, you'll see a notification with:
 ### Key Components
 
 - **MainActivity.kt**: Primary app interface using Compose UI
+- **LightsActivity.kt**: Visual therapy mode with ball animation
 - **SoundService.kt**: Background service managing audio playback
 - **NoizsAppWidget.kt**: Home screen widget implementation
+- **UserPreferencesRepository.kt**: Preference management using DataStore
 - **Media3 Integration**: Professional-grade audio handling
 
 ### Audio Implementation
@@ -181,6 +222,15 @@ The app uses AndroidX Media3 for robust audio playback:
 - **MediaSession**: System integration for notification controls
 - **Foreground Service**: Ensures uninterrupted background playback
 - **Wake Lock**: Maintains playback when screen is off
+
+### Visual Therapy Implementation
+
+The animation system provides therapeutic visual experiences:
+- **Jetpack Compose Animations**: Smooth, hardware-accelerated ball movement
+- **Coroutine-based Timing**: Precise control over animation duration and speed
+- **Text-to-Speech**: Android TTS API for session feedback
+- **DataStore Preferences**: Persistent storage of user customizations
+- **Orientation Adaptation**: Dynamic scaling based on screen dimensions
 
 ### Widget Architecture
 
@@ -195,6 +245,11 @@ noizs/
 ├── app/                          # Main application module
 │   ├── src/main/
 │   │   ├── java/com/lusion/noizs/    # Kotlin source files
+│   │   │   ├── MainActivity.kt       # Main sound selection interface
+│   │   │   ├── LightsActivity.kt     # Visual therapy ball animation
+│   │   │   ├── SoundService.kt       # Background audio service
+│   │   │   ├── NoizsAppWidget.kt     # Home screen widget
+│   │   │   └── UserPreferencesRepository.kt # Settings management
 │   │   └── res/                      # Android resources
 │   └── build.gradle.kts             # App-level build configuration
 ├── assets/                       # Project assets
@@ -211,6 +266,8 @@ noizs/
 ### Important Files
 
 - **VIBE_CODE_INSTRUCTIONS.md**: Comprehensive development guidelines and technical specifications
+- **UserPreferencesRepository.kt**: User settings and preferences management
+- **LightsActivity.kt**: Visual therapy mode implementation
 - **assets/sound/**: Six high-quality ambient sound files
 - **LICENSE**: MIT License for open-source usage
 - **gradle.properties**: Build configuration properties
