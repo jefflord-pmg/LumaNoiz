@@ -43,7 +43,7 @@ class LightsActivityInstructionsTest {
         ).assertIsDisplayed()
         
         composeTestRule.onNodeWithText(
-            "It's a simple, soothing game of counting electric sheep. Relax, breathe, and enjoy the rhythm.",
+            "It's a simple, soothing game of counting electric sheep. Relax, breathe, and enjoy",
             substring = true
         ).assertIsDisplayed()
 

@@ -88,7 +88,7 @@ fun InstructionsDialog(onStartGame: () -> Unit) {
                         
                         You can hold anywhere on the screen (long press) to pause the light and view settings, time remaining, and how many passes you've counted so far.
                         
-                        It's a simple, soothing game of counting electric sheep. Relax, breathe, and enjoy the rhythm.
+                        It's a simple, soothing game of counting electric sheep. Relax, breathe, and enjoy
                     """.trimIndent(),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Start,
