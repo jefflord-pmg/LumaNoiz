@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">LumaNoiz</string>
+    <string name="appwidget_text">LumaNoiz Widget</string>
 </resources>
