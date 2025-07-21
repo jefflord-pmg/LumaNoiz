@@ -1,4 +1,4 @@
-# 🌙 Noizs
+# 🌙 LumaNoiz
 
 **A simple, free Android app for ambient sounds to aid sleep and relaxation**
 
@@ -23,9 +23,11 @@
 
 ## 🎯 About
 
-Noizs is a minimalist Android application designed to help users achieve better sleep and relaxation through high-quality ambient soundscapes and visual therapy techniques. The app provides a carefully curated selection of noise types including white noise, brown noise, grey noise, and pink noise, all optimized for continuous background playback, plus a customizable ball animation feature for focus and visual therapy.
+An offshoot from https://github.com/Rowdster/noizs.
 
-### Why Noizs?
+LumaNoiz is a minimalist Android application designed to help users achieve better sleep and relaxation through high-quality ambient soundscapes and visual therapy techniques. The app provides a carefully curated selection of noise types including white noise, brown noise, grey noise, and pink noise, all optimized for continuous background playback, plus a customizable ball animation feature for focus and visual therapy.
+
+### Why LumaNoiz?
 
 - **Sleep Enhancement**: Ambient sounds help mask disruptive environmental noise
 - **Focus Improvement**: Background noise and visual therapy can enhance concentration during work or study
@@ -120,8 +122,8 @@ To build and modify the app, you'll need:
 
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/jefflord-pmg/noizs.git
-   cd noizs
+   git clone https://github.com/jefflord-pmg/LumaNoiz.git
+   cd LumaNoiz
    ```
 
 2. **Open in Android Studio**
@@ -149,7 +151,7 @@ To build and modify the app, you'll need:
 
 ### Basic Operation
 
-1. **Launch the App**: Tap the Noizs icon to open the application
+1. **Launch the App**: Tap the LumaNoiz icon to open the application
 2. **Select a Sound**: Browse the grid of available ambient sounds
 3. **Start Playback**: Tap your preferred sound to begin playing
 4. **Control Playback**: Use the play/pause controls within the app
@@ -177,7 +179,7 @@ When audio is playing, you'll see a notification with:
 
 ### Widget Usage
 
-1. **Add Widget**: Long-press on home screen → Widgets → Noizs
+1. **Add Widget**: Long-press on home screen → Widgets → LumaNoiz
 2. **Quick Control**: Tap widget to play/pause last selected sound
 3. **Visual Indicator**: 
    - Moon off: No sound playing
@@ -204,14 +206,14 @@ When audio is playing, you'll see a notification with:
 - **Audio Engine**: AndroidX Media3 (ExoPlayer and MediaSession)
 - **Minimum SDK**: Android 10 (API 29)
 - **Target SDK**: Android 14 (API 36)
-- **App ID**: `com.lusion.noizs`
+- **App ID**: `com.lusion.LumaNoiz`
 
 ### Key Components
 
 - **MainActivity.kt**: Primary app interface using Compose UI
 - **LightsActivity.kt**: Visual therapy mode with ball animation
 - **SoundService.kt**: Background service managing audio playback
-- **NoizsAppWidget.kt**: Home screen widget implementation
+- **LumaNoizAppWidget.kt**: Home screen widget implementation
 - **UserPreferencesRepository.kt**: Preference management using DataStore
 - **Media3 Integration**: Professional-grade audio handling
 
@@ -241,14 +243,14 @@ The animation system provides therapeutic visual experiences:
 ## 📁 Project Structure
 
 ```
-noizs/
+LumaNoiz/
 ├── app/                          # Main application module
 │   ├── src/main/
-│   │   ├── java/com/lusion/noizs/    # Kotlin source files
+│   │   ├── java/com/lusion/LumaNoiz/    # Kotlin source files
 │   │   │   ├── MainActivity.kt       # Main sound selection interface
 │   │   │   ├── LightsActivity.kt     # Visual therapy ball animation
 │   │   │   ├── SoundService.kt       # Background audio service
-│   │   │   ├── NoizsAppWidget.kt     # Home screen widget
+│   │   │   ├── LumaNoizAppWidget.kt     # Home screen widget
 │   │   │   └── UserPreferencesRepository.kt # Settings management
 │   │   └── res/                      # Android resources
 │   └── build.gradle.kts             # App-level build configuration
@@ -310,7 +312,7 @@ noizs/
 
 ## 🤝 Contributing
 
-We welcome contributions to improve Noizs! Here's how you can help:
+We welcome contributions to improve LumaNoiz! Here's how you can help:
 
 ### Ways to Contribute
 
@@ -365,14 +367,14 @@ SOFTWARE.
 
 ## 📞 Contact
 
-- **Repository**: [https://github.com/jefflord-pmg/noizs](https://github.com/jefflord-pmg/noizs)
-- **Issues**: [Report bugs or request features](https://github.com/jefflord-pmg/noizs/issues)
+- **Repository**: [https://github.com/jefflord-pmg/LumaNoiz](https://github.com/jefflord-pmg/LumaNoiz)
+- **Issues**: [Report bugs or request features](https://github.com/jefflord-pmg/LumaNoiz/issues)
 - **Author**: RogueCoder
 
 ### Support
 
 For support with the app:
-1. Check existing [GitHub Issues](https://github.com/jefflord-pmg/noizs/issues)
+1. Check existing [GitHub Issues](https://github.com/jefflord-pmg/LumaNoiz/issues)
 2. Search through [documentation](VIBE_CODE_INSTRUCTIONS.md)
 3. Create a new issue with detailed description
 
