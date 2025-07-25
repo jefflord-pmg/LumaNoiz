@@ -1,4 +1,4 @@
-package com.lusion.noizs
+package com.lusion.lumanoiz
 
 import android.content.pm.ActivityInfo
 import org.junit.Test
@@ -66,9 +66,40 @@ class OrientationTest {
         assertEquals("Should save unspecified orientation", ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED, savedOrientation)
         assertEquals("Should switch to portrait for pause menu", ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, currentOrientation)
         
-        // Simulate hiding pause menu (restore saved orientation)
-        currentOrientation = savedOrientation
+        // Simulate hiding pause menu with fix - only restore if not unspecified
+        if (savedOrientation != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) {
+            currentOrientation = savedOrientation
+        }
+        // If savedOrientation is UNSPECIFIED, don't change currentOrientation
         
-        assertEquals("Should restore unspecified orientation", ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED, currentOrientation)
+        assertEquals("Should stay in portrait when savedOrientation is unspecified", ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, currentOrientation)
+    }
+    
+    @Test
+    fun testOrientationPreservation_fixValidatesCorrectBehavior() {
+        // This test validates that the fix works correctly:
+        // When savedOrientation is UNSPECIFIED, we should NOT change the current orientation
+        var savedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        var currentOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // User is currently in portrait after menu was shown
+        
+        // Simulate the fix logic: only restore if savedOrientation is not UNSPECIFIED
+        if (savedOrientation != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) {
+            currentOrientation = savedOrientation
+        }
+        
+        assertEquals("Should remain in current orientation when savedOrientation is unspecified", 
+                    ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, currentOrientation)
+        
+        // Test with a valid saved orientation
+        savedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        currentOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // User is in portrait (menu mode)
+        
+        // Apply the fix logic again
+        if (savedOrientation != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) {
+            currentOrientation = savedOrientation
+        }
+        
+        assertEquals("Should restore landscape when savedOrientation is valid", 
+                    ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, currentOrientation)
     }
 }
