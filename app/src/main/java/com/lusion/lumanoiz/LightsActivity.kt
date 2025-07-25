@@ -111,18 +111,21 @@ fun BallAnimationScreen() {
     var animationKey by rememberSaveable { mutableStateOf(0) } // Key to restart animation
     var initialDurationLoaded by rememberSaveable { mutableStateOf(false) }
     var savedOrientation by rememberSaveable { mutableStateOf(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) }
+    var isInitialOrientationSet by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(showPauseMenu) {
-        if (showPauseMenu) {
-            // Save current orientation before switching to portrait
-            activity?.let { act ->
-                savedOrientation = act.requestedOrientation
+        activity?.let { act ->
+            if (showPauseMenu) {
+                if (!isInitialOrientationSet) {
+                    savedOrientation = act.requestedOrientation
+                    isInitialOrientationSet = true
+                }
                 act.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-            }
-        } else {
-            // Restore the previously saved orientation only if it's not unspecified
-            if (savedOrientation != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) {
-                activity?.requestedOrientation = savedOrientation
+            } else {
+                if (isInitialOrientationSet) {
+                    act.requestedOrientation = savedOrientation
+                    isInitialOrientationSet = false // Reset for next time
+                }
             }
         }
     }
