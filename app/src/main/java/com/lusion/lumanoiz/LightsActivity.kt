@@ -120,8 +120,10 @@ fun BallAnimationScreen() {
                 act.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
             }
         } else {
-            // Restore the previously saved orientation
-            activity?.requestedOrientation = savedOrientation
+            // Restore the previously saved orientation only if it's not unspecified
+            if (savedOrientation != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) {
+                activity?.requestedOrientation = savedOrientation
+            }
         }
     }
 
