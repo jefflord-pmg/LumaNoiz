@@ -1,0 +1,1 @@
+echo gh release create "alpha-two" app\build\outputs\apk\debug\app-debug.apk
