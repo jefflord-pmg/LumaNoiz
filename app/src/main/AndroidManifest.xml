@@ -15,7 +15,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
-        android:theme="@style/Theme.LumaNoizApp"
+        android:theme="@style/Theme.App.Starting"
         tools:targetApi="31">
         <activity
             android:name=".LightsActivity"
@@ -24,8 +24,7 @@
         </activity>
         <activity
             android:name=".MainActivity"
-            android:exported="true"
-            android:theme="@style/Theme.LumaNoizApp">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
