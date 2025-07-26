@@ -140,7 +140,8 @@ fun LumaNoizAppScreen() {
             verticalArrangement = if (isAnchoredToBottom) Arrangement.Bottom else Arrangement.Top
         ) {
             LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
+                columns = GridCells.Adaptive(minSize = 180.dp),
+                modifier = Modifier.weight(1f),
                 contentPadding = PaddingValues(8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
