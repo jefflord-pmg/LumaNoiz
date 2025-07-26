@@ -233,6 +233,16 @@ fun BallAnimationScreen() {
             }
         }
 
+        val displayCount = if (ballHiddenCount > 0) ballHiddenCount - 1 else 0
+        Text(
+            text = displayCount.toString(),
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(16.dp),
+            color = Color.White.copy(alpha = 0.5f),
+            fontSize = 24.sp
+        )
+
         if (showPauseMenu) {
             // Ball Pause Menu
             Box(
