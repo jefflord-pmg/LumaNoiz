@@ -51,6 +51,8 @@ import kotlin.random.Random
 import android.speech.tts.TextToSpeech
 import java.util.Locale
 
+enum class BallDirection { LTR, RTL }
+
 class LightsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -109,6 +111,7 @@ fun BallAnimationScreen() {
     var timeRemaining by rememberSaveable { mutableStateOf(0L) }
     var animationKey by rememberSaveable { mutableStateOf(0) } // Key to restart animation
     var initialDurationLoaded by rememberSaveable { mutableStateOf(false) }
+    var direction by rememberSaveable { mutableStateOf(BallDirection.LTR) }
 
     LaunchedEffect(totalDurationMinutes) {
         if (!initialDurationLoaded) {
@@ -116,6 +119,8 @@ fun BallAnimationScreen() {
             initialDurationLoaded = true
         }
     }
+
+    val xPosition = remember { Animatable(0f) }
 
     Box(
         modifier = Modifier
@@ -146,7 +151,7 @@ fun BallAnimationScreen() {
 
             val ballSizeDp = with(LocalDensity.current) { ballSizePx.toDp() }
 
-            val xPosition = remember { Animatable(0f) }
+
 
             val yOffset = with(LocalDensity.current) { ((screenHeight - ballSizePx) / 2).toDp() }
 
@@ -166,45 +171,71 @@ fun BallAnimationScreen() {
 
                     val result = withTimeoutOrNull(animationDuration) {
                         while (isActive) {
-                            // Left to Right
-                            isVisible = true
-                            val durationLtr = Random.nextLong(minDuration.toLong(), maxDuration.toLong())
-                            lastBallSpeed = durationLtr
-                            xPosition.animateTo(
-                                targetValue = screenWidth,
-                                animationSpec = tween(
-                                    durationMillis = durationLtr.toInt(),
-                                    easing = LinearEasing
-                                )
-                            )
+                            val fullDistance = screenWidth + ballSizePx
 
-                            // Pause at right
-                            isVisible = false
-                            ballHiddenCount++
-                            delay(Random.nextLong(300, 3001))
+                            if (direction == BallDirection.LTR) {
+                                // Left to Right
+                                isVisible = true
+                                val remainingDistance = (screenWidth - xPosition.value).coerceAtLeast(0f)
+                                val duration: Long
 
-                            // Teleport to right edge before animating back
-                            xPosition.snapTo(screenWidth)
+                                if (xPosition.value <= 0f) { // Starting LTR from left edge
+                                    duration = Random.nextLong(minDuration.toLong(), maxDuration.toLong())
+                                    lastBallSpeed = duration
+                                } else { // Resuming LTR
+                                    duration = (lastBallSpeed * (remainingDistance / fullDistance)).toLong().coerceAtLeast(1)
+                                }
 
-                            // Right to Left
-                            isVisible = true
-                            val durationRtl = Random.nextLong(minDuration.toLong(), maxDuration.toLong())
-                            lastBallSpeed = durationRtl
-                            xPosition.animateTo(
-                                targetValue = -ballSizePx,
-                                animationSpec = tween(
-                                    durationMillis = durationRtl.toInt(),
-                                    easing = LinearEasing
-                                )
-                            )
+                                if (duration > 0) {
+                                    xPosition.animateTo(
+                                        targetValue = screenWidth,
+                                        animationSpec = tween(
+                                            durationMillis = duration.toInt(),
+                                            easing = LinearEasing
+                                        )
+                                    )
+                                }
 
-                            // Pause at left
-                            isVisible = false
-                            ballHiddenCount++
-                            delay(Random.nextLong(300, 1501))
+                                // Pause at right
+                                isVisible = false
+                                ballHiddenCount++
+                                direction = BallDirection.RTL
+                                delay(Random.nextLong(300, 3001))
 
-                            // Teleport to left edge
-                            xPosition.snapTo(-ballSizePx)
+                                // Teleport to right edge before animating back
+                                xPosition.snapTo(screenWidth)
+                            } else { // RTL
+                                // Right to Left
+                                isVisible = true
+                                val remainingDistance = (xPosition.value + ballSizePx).coerceAtLeast(0f)
+                                val duration: Long
+
+                                if (xPosition.value >= screenWidth) { // Starting RTL from right edge
+                                    duration = Random.nextLong(minDuration.toLong(), maxDuration.toLong())
+                                    lastBallSpeed = duration
+                                } else { // Resuming RTL
+                                    duration = (lastBallSpeed * (remainingDistance / fullDistance)).toLong().coerceAtLeast(1)
+                                }
+
+                                if (duration > 0) {
+                                    xPosition.animateTo(
+                                        targetValue = -ballSizePx,
+                                        animationSpec = tween(
+                                            durationMillis = duration.toInt(),
+                                            easing = LinearEasing
+                                        )
+                                    )
+                                }
+
+                                // Pause at left
+                                isVisible = false
+                                ballHiddenCount++
+                                direction = BallDirection.LTR
+                                delay(Random.nextLong(300, 1501))
+
+                                // Teleport to left edge
+                                xPosition.snapTo(-ballSizePx)
+                            }
                         }
                     }
                     timerJob.cancel()
@@ -233,9 +264,8 @@ fun BallAnimationScreen() {
             }
         }
 
-        val displayCount = if (ballHiddenCount > 0) ballHiddenCount - 1 else 0
         Text(
-            text = displayCount.toString(),
+            text = ballHiddenCount.toString(),
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(16.dp),
@@ -263,9 +293,8 @@ fun BallAnimationScreen() {
                     modifier = Modifier.padding(16.dp)
                 ) {
                     item {
-                        val displayCount = if (ballHiddenCount > 0) ballHiddenCount - 1 else 0
                         Text(
-                            text = displayCount.toString(),
+                            text = ballHiddenCount.toString(),
                             color = Color.White,
                             fontSize = 48.sp
                         )
@@ -308,6 +337,10 @@ fun BallAnimationScreen() {
                                 onClick = {
                                     ballHiddenCount = 0
                                     timeRemaining = (totalDurationMinutes * 60 * 1000).toLong()
+                                    coroutineScope.launch {
+                                        xPosition.snapTo(0f)
+                                    }
+                                    direction = BallDirection.LTR
                                     animationKey++ // This will re-trigger the LaunchedEffect
                                     isPaused = false
                                     showPauseMenu = false
