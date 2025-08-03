@@ -23,6 +23,11 @@
             android:theme="@style/Theme.LumaNoizApp">
         </activity>
         <activity
+            android:name=".StrobeLightsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.LumaNoizApp">
+        </activity>
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>

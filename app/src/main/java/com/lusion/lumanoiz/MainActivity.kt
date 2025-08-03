@@ -202,6 +202,28 @@ fun LumaNoizAppScreen() {
                     )
                 }
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                    val intent = Intent(context, StrobeLightsActivity::class.java)
+                    context.startActivity(intent)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF6A4A8A)
+                )
+            ) {
+                Text(
+                    text = "Strobe Lights",
+                    color = Color.White,
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }
