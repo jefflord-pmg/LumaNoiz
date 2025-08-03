@@ -84,6 +84,17 @@ fun StrobeLightsScreen() {
 
     var showMenu by remember { mutableStateOf(false) }
     var isVisible by remember { mutableStateOf(true) }
+    var selectedRange by remember { mutableStateOf<FrequencyRange?>(null) }
+
+    // Define frequency ranges first, before using them
+    val frequencyRanges = remember {
+        listOf(
+            FrequencyRange("Delta", 0.5f, 4f),
+            FrequencyRange("Theta", 4f, 8f),
+            FrequencyRange("Alpha", 8f, 13f), // Default
+            FrequencyRange("Beta", 13f, 30f)
+        )
+    }
 
     // Collect settings from DataStore
     val savedFrequency by settingsRepository.strobeFrequency.collectAsState(initial = 8f)
@@ -95,27 +106,37 @@ fun StrobeLightsScreen() {
     // Update state when saved values change
     LaunchedEffect(savedFrequency) {
         currentFrequency = savedFrequency
+        // Set initial selected range based on saved frequency
+        selectedRange = frequencyRanges.find { range ->
+            savedFrequency >= range.minHz && savedFrequency <= range.maxHz
+        }
     }
 
     LaunchedEffect(savedBallSize) {
         ballSize = savedBallSize
     }
 
-    val frequencyRanges = remember {
-        listOf(
-            FrequencyRange("Delta", 0.5f, 4f),
-            FrequencyRange("Theta", 4f, 8f),
-            FrequencyRange("Alpha", 8f, 13f), // Default
-            FrequencyRange("Beta", 13f, 30f)
-        )
+    // Dynamic speed control - change frequency every 2 seconds within selected range
+    LaunchedEffect(selectedRange) {
+        selectedRange?.let { range ->
+            while (true) {
+                kotlinx.coroutines.delay(2000) // Wait 2 seconds
+                val newFreq = Random.nextFloat() * (range.maxHz - range.minHz) + range.minHz
+                currentFrequency = newFreq
+                // Save the new frequency
+                settingsRepository.setStrobeFrequency(newFreq)
+            }
+        }
     }
 
-    // Strobe effect for the ball
-    LaunchedEffect(currentFrequency) {
-        val intervalMs = (1000f / currentFrequency / 2f).toLong() // Divide by 2 for on/off cycle
-        while (true) {
-            isVisible = !isVisible
-            kotlinx.coroutines.delay(intervalMs)
+    // Strobe effect for the ball - ONLY when menu is NOT visible
+    LaunchedEffect(currentFrequency, showMenu) {
+        if (!showMenu) { // Only strobe when menu is hidden
+            val intervalMs = (1000f / currentFrequency / 2f).toLong() // Divide by 2 for on/off cycle
+            while (!showMenu) { // Keep checking menu visibility
+                isVisible = !isVisible
+                kotlinx.coroutines.delay(intervalMs)
+            }
         }
     }
 
@@ -173,7 +194,7 @@ fun StrobeLightsScreen() {
                         modifier = Modifier.padding(bottom = 24.dp)
                     )
 
-                    // Ball Size Slider
+                    // Ball Size Slider - Updated range to 100%
                     Text(
                         text = "Ball Size: ${(ballSize * 100).roundToInt()}%",
                         color = Color.White,
@@ -192,7 +213,7 @@ fun StrobeLightsScreen() {
                                 settingsRepository.setBallSize(ballSize)
                             }
                         },
-                        valueRange = 0.1f..0.8f,
+                        valueRange = 0.1f..1.0f, // Updated to allow 100% size
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = 24.dp),
@@ -217,6 +238,7 @@ fun StrobeLightsScreen() {
                             onClick = {
                                 val randomFreq = Random.nextFloat() * (range.maxHz - range.minHz) + range.minHz
                                 currentFrequency = randomFreq
+                                selectedRange = range // Set the selected range for dynamic updates
                                 // Save to DataStore
                                 coroutineScope.launch {
                                     settingsRepository.setStrobeFrequency(randomFreq)
@@ -226,7 +248,7 @@ fun StrobeLightsScreen() {
                                 .fillMaxWidth()
                                 .padding(vertical = 4.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (currentFrequency >= range.minHz && currentFrequency <= range.maxHz)
+                                containerColor = if (selectedRange == range)
                                     Color(0xFF6A4A8A) else Color(0xFF4A4A4A)
                             )
                         ) {
