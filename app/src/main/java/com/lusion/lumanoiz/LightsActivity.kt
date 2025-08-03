@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -23,6 +24,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -109,6 +111,7 @@ fun BallAnimationScreen() {
     var animationKey by rememberSaveable { mutableStateOf(0) } // Key to restart animation
     var initialDurationLoaded by rememberSaveable { mutableStateOf(false) }
     var direction by rememberSaveable { mutableStateOf(BallDirection.LTR) }
+    var showInstructions by rememberSaveable { mutableStateOf(true) }
 
     LaunchedEffect(totalDurationMinutes) {
         if (!initialDurationLoaded) {
@@ -125,9 +128,11 @@ fun BallAnimationScreen() {
             .pointerInput(Unit) {
                 detectTapGestures(
                     onLongPress = {
-                        isPaused = true
-                        showPauseMenu = true
-                        isVisible = false
+                        if (!showInstructions) {
+                            isPaused = true
+                            showPauseMenu = true
+                            isVisible = false
+                        }
                     }
                 )
             },
@@ -152,8 +157,8 @@ fun BallAnimationScreen() {
 
             val yOffset = with(LocalDensity.current) { ((screenHeight - ballSizePx) / 2).toDp() }
 
-            LaunchedEffect(isPaused, ballSize, minDuration, maxDuration, totalDurationMinutes, animationKey) {
-                if (!isPaused) {
+            LaunchedEffect(isPaused, ballSize, minDuration, maxDuration, totalDurationMinutes, animationKey, showInstructions) {
+                if (!isPaused && !showInstructions) {
                     val animationDuration = timeRemaining
                     val startTime = System.currentTimeMillis()
 
@@ -269,6 +274,64 @@ fun BallAnimationScreen() {
             color = Color.White.copy(alpha = 0.5f),
             fontSize = 24.sp
         )
+
+        if (showInstructions) {
+            // Instructions Screen
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .pointerInput(Unit) {
+                        detectTapGestures(
+                            onTap = {
+                                showInstructions = false
+                            }
+                        )
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                LazyColumn(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(32.dp)
+                ) {
+                    item {
+                        Text(
+                            text = "LumaNoiz Light Therapy",
+                            color = Color.White,
+                            fontSize = 28.sp,
+                            modifier = Modifier.padding(bottom = 24.dp)
+                        )
+                    }
+                    item {
+                        Text(
+                            text = "You will see gently moving light to help relax your mind by stimulating calm brainwave activity through closed eyelids. Simply close your eyes and let the soft motion guide your focus.\n\nA light will slowly travel left and right across the screen. Your goal is to count how many times the light passes in front of your closed eyes.\n\nYou can hold anywhere on the screen (long press) to pause the light and view settings, time remaining, and how many passes you've counted so far.\n\nIt's a simple, soothing game of counting electric sheep. Relax, breathe, and enjoy the rhythm.",
+                            color = Color.White,
+                            fontSize = 16.sp,
+                            lineHeight = 24.sp,
+                            modifier = Modifier.padding(bottom = 32.dp)
+                        )
+                    }
+                    item {
+                        Button(
+                            onClick = {
+                                showInstructions = false
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(60.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF4A4A4A)
+                            )
+                        ) {
+                            Text(
+                                text = "Begin Session",
+                                color = Color.White,
+                                fontSize = 18.sp
+                            )
+                        }
+                    }
+                }
+            }
+        }
 
         if (showPauseMenu) {
             // Ball Pause Menu
