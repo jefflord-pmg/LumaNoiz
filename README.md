@@ -25,7 +25,7 @@
 
 An offshoot from https://github.com/Rowdster/noizs.
 
-LumaNoiz is a minimalist Android application designed to help users achieve better sleep and relaxation through high-quality ambient soundscapes and visual therapy techniques. The app provides a carefully curated selection of noise types including white noise, brown noise, grey noise, and pink noise, all optimized for continuous background playback, plus a customizable ball animation feature for focus and visual therapy.
+LumaNoiz is a minimalist Android application designed to help users achieve better sleep and relaxation through high-quality ambient soundscapes and visual therapy techniques. The app provides a carefully curated selection of noise types including white noise, brown noise, grey noise, and pink noise, all optimized for continuous background playback, plus customizable ball animation and brainwave frequency-based strobe therapy features for focus and visual relaxation.
 
 ### Why LumaNoiz?
 
@@ -33,6 +33,7 @@ LumaNoiz is a minimalist Android application designed to help users achieve bett
 - **Focus Improvement**: Background noise and visual therapy can enhance concentration during work or study
 - **Relaxation Aid**: Gentle soundscapes and calming animations promote stress reduction and mental calm
 - **Visual Therapy**: Customizable ball animation for focus training and visual relaxation
+- **Brainwave Therapy**: Scientifically-informed strobe frequencies targeting specific mental states
 - **Completely Free**: No ads, no in-app purchases, no user tracking
 - **Simple Design**: Intuitive interface designed for ease of use, especially at night
 
@@ -41,11 +42,12 @@ LumaNoiz is a minimalist Android application designed to help users achieve bett
 Anyone looking for a simple, free app to help them sleep, focus, or relax, including:
 - Light sleepers who need noise masking
 - Students and professionals seeking focus enhancement
-- Meditation practitioners
+- Meditation practitioners interested in brainwave frequency therapy
 - Parents helping children sleep
 - Anyone dealing with tinnitus or anxiety
 - Individuals using visual therapy techniques for focus and relaxation
 - People with ADHD or attention difficulties who benefit from controlled visual stimulation
+- Those interested in exploring therapeutic brainwave frequencies (Delta, Theta, Alpha, Beta)
 
 ## ✨ Features
 
@@ -78,26 +80,35 @@ Anyone looking for a simple, free app to help them sleep, focus, or relax, inclu
 
 ### 🎯 Visual Therapy Features
 - **"Show Lights" Animation**: Relaxing ball animation for focus and visual therapy
-- **Customizable Ball Settings**: Adjustable ball size, speed (100-5000ms), and session duration (1-10 minutes)
-- **Adaptive Display**: Animation adjusts to screen orientation and size
-- **Interactive Controls**: Long-press to pause/resume and access settings
-- **Session Management**: Timer-based sessions with automatic completion
-- **Text-to-Speech Feedback**: Voice announcement of session results
-- **Progress Tracking**: Real-time display of remaining time and ball movement count
+  - Customizable ball size, speed (100-5000ms), and session duration (1-10 minutes)
+  - Adaptive display that adjusts to screen orientation and size
+  - Interactive controls with long-press to pause/resume and access settings
+  - Session management with timer-based sessions and automatic completion
+  - Text-to-Speech feedback with voice announcement of session results
+  - Progress tracking with real-time display of remaining time and ball movement count
+- **"Strobe Lights" Mode**: Brainwave frequency-based strobe lighting therapy
+  - **Delta Waves** (0.5-4 Hz): Deep sleep and healing frequencies
+  - **Theta Waves** (4-8 Hz): Meditation and creative states
+  - **Alpha Waves** (8-13 Hz): Relaxed awareness and focus (default)
+  - **Beta Waves** (13-30 Hz): Active concentration and alertness
+  - Dynamic frequency variations within selected brainwave ranges
+  - Customizable strobe ball size and real-time frequency display
+  - Automatic frequency changes every 2 seconds for optimal therapeutic effect
 
 ## 📱 Screenshots
 
 *Main App Interface:*
 - Sound selection grid with six ambient sound options
-- "Show Lights" button for accessing visual therapy mode
+- "Show Lights" button for accessing ball animation visual therapy mode
+- "Strobe Lights" button for accessing brainwave frequency strobe therapy
 
 *Widget States:*
 - Moon off icon: When no sound is playing
 - Moon on icon: When sound is actively playing
 
-*Visual Therapy Mode:*
-- Full-screen ball animation with customizable settings
-- Pause menu with controls for ball size, speed, and duration
+*Visual Therapy Modes:*
+- **Ball Animation Mode**: Full-screen ball animation with customizable settings and pause menu for ball size, speed, and duration controls
+- **Strobe Lights Mode**: Brainwave frequency-based strobe therapy with Delta, Theta, Alpha, and Beta wave options
 
 *Note: Screenshots and app previews can be found in the repository's image files.*
 
@@ -156,7 +167,7 @@ To build and modify the app, you'll need:
 3. **Start Playback**: Tap your preferred sound to begin playing
 4. **Control Playback**: Use the play/pause controls within the app
 5. **Background Use**: Minimize the app - audio continues playing
-6. **Access Visual Therapy**: Tap "Show Lights" button for ball animation mode
+5. **Access Visual Therapy**: Tap "Show Lights" for ball animation mode or "Strobe Lights" for brainwave frequency therapy
 
 ### Visual Therapy Mode
 
@@ -169,6 +180,19 @@ To build and modify the app, you'll need:
    - Choose session duration (1-10 minutes)
 5. **Resume/Restart**: Use "Resume" to continue or "Restart" for new session
 6. **Session Completion**: Audio announcement when timer expires
+
+### Strobe Lights Mode
+
+1. **Enter Mode**: Tap the "Strobe Lights" button on main screen
+2. **Select Brainwave Frequency**: Choose from four therapeutic frequency ranges:
+   - **Delta** (0.5-4 Hz): For deep relaxation and sleep preparation
+   - **Theta** (4-8 Hz): For meditation and creative visualization  
+   - **Alpha** (8-13 Hz): For relaxed focus and stress reduction (default)
+   - **Beta** (13-30 Hz): For active concentration and mental alertness
+3. **Automatic Variations**: Frequency changes dynamically every 2 seconds within selected range
+4. **Customize Ball Size**: Long-press screen to access menu and adjust strobe ball size
+5. **Monitor Frequency**: Current frequency displayed in top-right corner (Hz)
+6. **Exit**: Tap outside settings menu or use back gesture to return to main screen
 
 ### Notification Controls
 
@@ -195,6 +219,8 @@ When audio is playing, you'll see a notification with:
 - **Layout Preference**: Long-press main screen to anchor controls to bottom
 - **Visual Therapy**: Use in dark environment for best ball animation visibility
 - **Focus Sessions**: Start with shorter durations (1-3 minutes) and gradually increase
+- **Strobe Therapy**: Begin with Alpha waves (8-13 Hz) for general relaxation, experiment with other frequencies based on desired mental state
+- **Brainwave Guidelines**: Delta for sleep preparation, Theta for meditation, Alpha for focus, Beta for concentration
 
 ## 🔧 Technical Details
 
@@ -211,7 +237,8 @@ When audio is playing, you'll see a notification with:
 ### Key Components
 
 - **MainActivity.kt**: Primary app interface using Compose UI
-- **LightsActivity.kt**: Visual therapy mode with ball animation
+- **LightsActivity.kt**: Ball animation visual therapy mode implementation
+- **StrobeLightsActivity.kt**: Brainwave frequency-based strobe therapy mode
 - **SoundService.kt**: Background service managing audio playback
 - **LumaNoizAppWidget.kt**: Home screen widget implementation
 - **UserPreferencesRepository.kt**: Preference management using DataStore
@@ -234,6 +261,16 @@ The animation system provides therapeutic visual experiences:
 - **DataStore Preferences**: Persistent storage of user customizations
 - **Orientation Adaptation**: Dynamic scaling based on screen dimensions
 
+### Strobe Therapy Implementation
+
+The brainwave frequency system provides scientifically-informed therapeutic strobing:
+- **Frequency Ranges**: Four therapeutic brainwave frequency bands (Delta, Theta, Alpha, Beta)
+- **Dynamic Frequency Control**: Automatic variations within selected ranges every 2 seconds
+- **Real-time Updates**: Live frequency display and smooth transitions
+- **Customizable Strobe Ball**: Adjustable size and positioning for optimal visual impact
+- **DataStore Persistence**: Saves user frequency and ball size preferences
+- **Therapeutic Targeting**: Specific frequencies designed for different mental states
+
 ### Widget Architecture
 
 - **Service Communication**: Intent-based messaging between widget and service
@@ -248,7 +285,8 @@ LumaNoiz/
 │   ├── src/main/
 │   │   ├── java/com/lusion/LumaNoiz/    # Kotlin source files
 │   │   │   ├── MainActivity.kt       # Main sound selection interface
-│   │   │   ├── LightsActivity.kt     # Visual therapy ball animation
+│   │   │   ├── LightsActivity.kt     # Ball animation visual therapy
+│   │   │   ├── StrobeLightsActivity.kt # Brainwave frequency strobe therapy
 │   │   │   ├── SoundService.kt       # Background audio service
 │   │   │   ├── LumaNoizAppWidget.kt     # Home screen widget
 │   │   │   └── UserPreferencesRepository.kt # Settings management
@@ -269,7 +307,8 @@ LumaNoiz/
 
 - **VIBE_CODE_INSTRUCTIONS.md**: Comprehensive development guidelines and technical specifications
 - **UserPreferencesRepository.kt**: User settings and preferences management
-- **LightsActivity.kt**: Visual therapy mode implementation
+- **LightsActivity.kt**: Ball animation visual therapy mode implementation
+- **StrobeLightsActivity.kt**: Brainwave frequency strobe therapy mode implementation
 - **assets/sound/**: Six high-quality ambient sound files
 - **LICENSE**: MIT License for open-source usage
 - **gradle.properties**: Build configuration properties
